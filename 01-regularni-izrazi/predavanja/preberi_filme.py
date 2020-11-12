@@ -1,6 +1,6 @@
 import re
 
-with open('250-najbolj-znanih-filmov.html') as f:
+with open('') as f:
     vsebina = f.read()
 
 vzorec = (

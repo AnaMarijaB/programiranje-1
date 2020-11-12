@@ -35,3 +35,4 @@ let rec skalarni_produkt xs ys =
   match (xs, ys) with
   | ([], []) -> 0.
   | (x :: xs', y :: ys') -> x *. y +. skalarni_produkt xs' ys'
+
