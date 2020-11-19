@@ -4,7 +4,14 @@
 Namig: Definirajte pomožno funkcijo za obračanje seznamov.
 [*----------------------------------------------------------------------------*)
 
-let rec reverse = ()
+let obrni xs =
+  let rec pomozna acc xs =
+    match xs with
+    | [] -> acc
+    | x :: xs' -> pomozna (x :: acc) xs'
+  in
+  pomozna [] xs
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [repeat x n] vrne seznam [n] ponovitev vrednosti [x]. Za neprimerne
@@ -16,7 +23,20 @@ let rec reverse = ()
  - : string list = []
 [*----------------------------------------------------------------------------*)
 
-let rec repeat = ()
+let rec repeat x n =
+  if n <= 0 then
+    []
+  else
+    x :: repeat x (n-1)
+
+let rec repeat_repna x n =
+  let rec aux x n acc =
+    if n <= 0 then
+      acc
+    else
+      aux x (n-1) (x :: acc)
+  in 
+  aux x n []
 
 (*----------------------------------------------------------------------------*]
  Funkcija [range] sprejme število in vrne seznam vseh celih števil od 0 do
@@ -27,7 +47,18 @@ let rec repeat = ()
  - : int list = [0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10]
 [*----------------------------------------------------------------------------*)
 
-let rec range = ()
+let rec range n =
+  let rec pomozna n acc = 
+    if n < 0 then
+      []
+    else
+      n :: pomozna (n-1) acc
+  in 
+  obrni (pomozna n [])
+
+let rec range_tudideluje n = 
+  let rec range_reverse n = if n <= 0 then [] else n :: range_reverse (n-1) in 
+  obrni(range_reverse n)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [map f list] sprejme seznam [list] oblike [x0; x1; x2; ...] in
@@ -39,7 +70,10 @@ let rec range = ()
  - : int list = [2; 3; 4; 5; 6]
 [*----------------------------------------------------------------------------*)
 
-let rec map = ()
+let rec map f xs = 
+  match xs with
+  |[]->[]
+  |x::xs -> f x :: map f xs
 
 (*----------------------------------------------------------------------------*]
  Funkcija [map_tlrec] je repno rekurzivna različica funkcije [map].
@@ -49,7 +83,13 @@ let rec map = ()
  - : int list = [2; 3; 4; 5; 6]
 [*----------------------------------------------------------------------------*)
 
-let rec map_tlrec = ()
+let map_tlrec f xs =
+  let rec pomozna acc xs =
+    match xs with
+    | [] -> obrni acc
+    | x :: xs' -> pomozna (f x :: acc) xs'
+  in
+  pomozna [] xs
 
 (*----------------------------------------------------------------------------*]
  Funkcija [mapi] je ekvivalentna python kodi:
@@ -67,7 +107,13 @@ let rec map_tlrec = ()
  - : int list = [0; 1; 2; 5; 6; 7]
 [*----------------------------------------------------------------------------*)
 
-let rec mapi = ()
+let rec mapi f sez = 
+  let rec pomozna f sez acc =
+    match sez with
+    |[] -> []
+    |x::xs -> (f x acc) :: pomozna f xs (acc + 1)
+  in
+  pomozna f sez 0
 
 (*----------------------------------------------------------------------------*]
  Funkcija [zip] sprejme dva seznama in vrne seznam parov istoležnih
@@ -79,7 +125,39 @@ let rec mapi = ()
  Exception: Failure "Different lengths of input lists.".
 [*----------------------------------------------------------------------------*)
 
-let rec zip = ()
+(*let rec zip sez1 sez2 = 
+  if List.length sez1 != List.length sez1   (*TO JE ZELO SLABA MOŽNOST! *)
+    failwith "Different lengths of input lists."
+  else ....*)
+
+let rec zip list1 list2 = 
+  match list1, list2 with 
+  |x::xs, y::ys -> (x, y) :: zip xs ys
+  |x::xs, [] -> failwith "Different lengths of input lists."
+  |[], y::ys -> failwith "Different lengths of input lists."
+  |[], [] -> []
+
+let rec zip1 list1 list2 = 
+  match (list1, list2) with 
+  |x::xs, y::ys -> (x, y) :: zip xs ys
+  |_::_, [] | [], _ :: _ -> failwith "Different lengths of input lists."
+  |[], [] -> []
+
+let rec zip1 list1 list2 = 
+  match (list1, list2) with 
+  |x::xs, y::ys -> (x, y) :: zip xs ys
+  |[], [] -> []
+  | _ -> failwith "Different lengths of input lists."
+
+let rec zip_z_repno list1 list2 =
+  let rec pomozna acc list1 list2 =
+    match list1, list2 with
+    |x::xs, y::ys -> pomozna ((x, y)::acc) xs ys
+    |[], [] -> obrni acc
+    | _ -> failwith "Different lengths of input lists."
+  in 
+  pomozna [] list1 list2
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [unzip] je inverz funkcije [zip], torej sprejme seznam parov
@@ -89,7 +167,27 @@ let rec zip = ()
  - : int list * string list = ([0; 1; 2], ["a"; "b"; "c"])
 [*----------------------------------------------------------------------------*)
 
-let rec unzip = ()
+let rec unzip_brez_repne  l = 
+    match l with
+    |[] -> ([], [])
+    |(x,y)::tail -> 
+    let (first, second) = unzip_brez_repne tail in 
+      (x::first, y::second)
+
+
+let f (l,s) (x,y) = (x::l,y::s)
+let unzip1 l = List.fold_left f ([],[]) (List.rev l)
+
+let rec unzip = function 
+  |[]->([], [])
+  |xy :: xys ->
+    let (x, y) = xy in 
+    let (xs, ys) = unzip xys in 
+    (x :: xs, y::ys)
+
+let rec unzip2 = function 
+  |[]->([], [])
+  |(x,y) :: xys -> let (xs, ys) = unzip xys in (x :: xs, y::ys)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [unzip_tlrec] je repno rekurzivna različica funkcije [unzip].
@@ -98,7 +196,12 @@ let rec unzip = ()
  - : int list * string list = ([0; 1; 2], ["a"; "b"; "c"])
 [*----------------------------------------------------------------------------*)
 
-let rec unzip_tlrec = ()
+let rec unzip_tlrec list = 
+  let rec unzip_aux xacc yacc = function
+    | (x,y) :: xys -> unzip_aux (x :: xacc) ( y :: yacc) xys
+    | [] -> (obrni xacc, obrni yacc)
+  in
+  unzip_aux [] [] list
 
 (*----------------------------------------------------------------------------*]
  Funkcija [loop condition f x] naj se izvede kot python koda:
@@ -113,7 +216,12 @@ let rec unzip_tlrec = ()
  - : int = 12
 [*----------------------------------------------------------------------------*)
 
-let rec loop = ()
+let rec loop condition f x =
+  if condition x then
+     let x' = f x in 
+     loop condition f x'
+  else
+    x
 
 (*----------------------------------------------------------------------------*]
  Funkcija [fold_left_no_acc f list] sprejme seznam [x0; x1; ...; xn] in

@@ -2,7 +2,7 @@ let pozdravi = function
   | "Matija" -> "Dober dan, gospod predavatelj!"
   | "Filip" | "Žiga" -> "Oj!"
   | "" -> "Živjo!"
-  | "*" -> "Dober dan!"
+  | _ -> "Dober dan!"
 
 let rec fakulteta = function
   | 0 -> 1
@@ -31,7 +31,7 @@ let rec vsota xs =
   | [] -> 0
   | x :: xs' -> x + vsota xs'
 
-let rec skalarni_produkt xs ys =
+let rec skalarni_produkt xs ys =  
   match (xs, ys) with
   | ([], []) -> 0.
   | (x :: xs', y :: ys') -> x *. y +. skalarni_produkt xs' ys'
