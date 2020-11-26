@@ -1,8 +1,8 @@
 let stakni_z_123 (sez : 'a list) =
-    sez @ [1; 2; 3]
+    sez @ [1; 2;  3]
 
 let uredi sez =
-    List.sort compare sez
+    List.sort sez
 
 let uredi_po f sez =
     let primerjaj x y = compare (f x) (f y) in

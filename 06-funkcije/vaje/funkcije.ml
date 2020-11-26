@@ -233,7 +233,10 @@ let rec loop condition f x =
  - : string = "FICUS"
 [*----------------------------------------------------------------------------*)
 
-let rec fold_left_no_acc = ()
+let rec fold_left_no_acc f  = function
+  |[] -> []
+  |x :: y :: xs -> let x' = f x y in fold_left_no_acc f xs
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [apply_sequence f x n] vrne seznam zaporednih uporab funkcije [f] na

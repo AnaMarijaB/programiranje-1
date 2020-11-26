@@ -1,3 +1,6 @@
+type r3 = float * float * float
+type 'a zaporedje = int -> 'a
+
 type barve = |Zelena | Rdeca| Modra
 
 type geometrijski_objekt = 
