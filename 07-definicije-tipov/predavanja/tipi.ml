@@ -1,4 +1,7 @@
 type r3 = float * float * float
+type 'a zaporedje = int -> 'a
+type ('k, 'v) slovar = ('k * 'v) list
+
 
 let vsota ((x1, y1, z1) : r3) ((x2, y2, z2) : r3) : r3 =
   (x1 +. x2, y1 +. y2, z1 +. z2)
