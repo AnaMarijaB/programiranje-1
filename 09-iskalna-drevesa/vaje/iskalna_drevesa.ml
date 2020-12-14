@@ -6,6 +6,7 @@
  poddrevesi. Na tej točki ne predpostavljamo ničesar drugega o obliki dreves.
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
 
+type 'a tree = Node of 'a tree * 'a * 'a tree | Empty
 
 (*----------------------------------------------------------------------------*]
  Definirajmo si testni primer za preizkušanje funkcij v nadaljevanju. Testni
@@ -18,6 +19,10 @@
       0   6   11
 [*----------------------------------------------------------------------------*)
 
+let leaf x = Node (Empty, x, Empty)
+
+let test = 
+     Node (Node (leaf 0, 2, Empty), 5, Node (leaf 6, 7, leaf 11))
 
 (*----------------------------------------------------------------------------*]
  Funkcija [mirror] vrne prezrcaljeno drevo. Na primeru [test_tree] torej vrne
@@ -33,6 +38,13 @@
  Node (Empty, 2, Node (Empty, 0, Empty)))
 [*----------------------------------------------------------------------------*)
 
+let rec mirror = function
+     |Empty -> Empty
+     |Node (lt, x, rt) -> Node (mirror rt, x, mirror lt)
+
+let rec size = function
+     |Empty -> 0
+     |Node (lt, x, rt) -> size lt + size rt + 1 
 
 (*----------------------------------------------------------------------------*]
  Funkcija [height] vrne višino oz. globino drevesa, funkcija [size] pa število
@@ -44,6 +56,12 @@
  - : int = 6
 [*----------------------------------------------------------------------------*)
 
+(* let rec height tree = function
+     |Empty -> 0
+     |Node (lt, x, rt) -> 
+          let l_height = height lt in 
+          let r_height = height rt in
+          (max l_height r_height) + 1  *)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [map_tree f tree] preslika drevo v novo drevo, ki vsebuje podatke
@@ -55,6 +73,10 @@
  Node (Node (Empty, true, Empty), true, Node (Empty, true, Empty)))
 [*----------------------------------------------------------------------------*)
 
+let rec map_tree (f : 'a -> 'b) (tree : 'a tree) : 'b tree =
+     match tree with
+     |Empty -> Empty
+     |Node (lt, x, rt) -> Node (map_tree f lt, f x, map_tree f rt)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [list_of_tree] pretvori drevo v seznam. Vrstni red podatkov v seznamu
@@ -63,6 +85,13 @@
  # list_of_tree test_tree;;
  - : int list = [0; 2; 5; 6; 7; 11]
 [*----------------------------------------------------------------------------*)
+
+let rec list_of_tree = function 
+     |Empty -> []
+     |Node (lt, x, rt) -> 
+          let l_list = list_of_tree lt in
+          let r_list = list_of_tree rt in
+          l_list @ [x] @ r_list
 
 
 (*----------------------------------------------------------------------------*]
@@ -76,6 +105,29 @@
  - : bool = false
 [*----------------------------------------------------------------------------*)
 
+let is_bst tree = 
+     let rec is_ordered = function
+          |[] -> true
+          | [x] -> true
+          |x::y :: others -> if x < y then is_ordered (y::others) else false
+     in
+     tree |> list_of_tree |> is_ordered
+
+let is_bst1 tree = 
+     let rec within_bounds low high = function
+          |Empty -> true
+          |Node (lt, x, rt) -> 
+               let low_bound_ok = match low with 
+                    |Some l -> l < x
+                    |None -> true
+               in
+               let high_bound_ok = match high with 
+                    |Some l -> l < x
+                    |None -> true
+               in
+               (within_bounds low (Some x) lt) && low_bound_ok && high_bound_ok && (within_bounds (Some x) high rt)
+     in
+     within_bounds None None tree
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  V nadaljevanju predpostavljamo, da imajo dvojiška drevesa strukturo BST.
@@ -91,6 +143,16 @@
  - : bool = false
 [*----------------------------------------------------------------------------*)
 
+let rec insert x = function
+     |Empty -> leaf x
+     |Node (lt, y, rt) when x <= y -> 
+          Node (insert x lt, y, rt)
+     | Node (lt, y, rt) -> 
+          Node (lt, y, insert x rt)
+
+(*PREPIŠI ŠE MEMBER FUNKCIJO *)
+
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [member2] ne privzame, da je drevo bst.
@@ -99,6 +161,10 @@
  funkcije [member2] na drevesu z n vozlišči, ki ima globino log(n). 
 [*----------------------------------------------------------------------------*)
 
+let rec member2 x = function
+     |Empty -> false
+     |Node (lt, y, rt) when x = y -> true
+     |Node (lt, y, rt) -> member2 x lt || member2 x rt
 
 (*----------------------------------------------------------------------------*]
  Funkcija [succ] vrne naslednjika korena danega drevesa, če obstaja. Za drevo
@@ -113,6 +179,16 @@
  - : int option = None
 [*----------------------------------------------------------------------------*)
 
+let rec minimal_el = function
+     |[] -> None
+     |Node (lt, x, rt) -> 
+          match minimal_el lt with
+          |None -> Some x
+          |Some y -> Some y
+
+let rec succ = function
+     |Empty -> None
+     |Node (lt, x, rt) -> minimal_el rt
 
 (*----------------------------------------------------------------------------*]
  Na predavanjih ste omenili dva načina brisanja elementov iz drevesa. Prvi 
@@ -127,6 +203,14 @@
  Node (Node (Empty, 6, Empty), 11, Empty))
 [*----------------------------------------------------------------------------*)
 
+let rec delete x = function
+     |Empty -> Empty
+     |Node (lt, y, rt) when x < y -> Node (delete x lt, y, rt)
+     |Node (lt, y, rt) when x > y -> Node (lt, y, delete x rt)
+     |Node (lt, y, rt) -> 
+          match succ (Node (lt, y, rt)) with
+          |Some z -> Node (lt, z, delete z rt)
+          |None -> lt 
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  SLOVARJI
@@ -138,6 +222,9 @@
  strukturo glede na ključe. Ker slovar potrebuje parameter za tip ključa in tip
  vrednosti, ga parametriziramo kot [('key, 'value) dict].
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
+(* 
+type ('key, 'value) dict = EmptyDict | Element of ('key, 'value) dict * 'key * 'value * ('key, 'value) dict) *)
+
 
 
 (*----------------------------------------------------------------------------*]

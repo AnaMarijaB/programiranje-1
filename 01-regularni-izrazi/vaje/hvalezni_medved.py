@@ -83,3 +83,10 @@ def double_letters(text):
 test4 = double_letters('A volunteer is worth twenty pressed men.')
 
 #pattern = re.compile(r'\b\w*(?P<char0>\w\d+)(?P<char1>\w)(?P=char1)(?P=char0)\w*\b')
+
+seznam = [1, 2, 3]
+def f(x):
+    seznam.append(x)
+    return len(seznam)
+def g(x):
+    return f(x) + f(x)
